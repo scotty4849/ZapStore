@@ -1,16 +1,16 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { mysqlTable, text, serial, datetime, varchar, int } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const ticketsTable = pgTable("tickets", {
+export const ticketsTable = mysqlTable("tickets", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  productId: integer("product_id").notNull(),
-  status: text("status").notNull().default("open"),
+  userId: int("user_id").notNull(),
+  productId: int("product_id").notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("open"),
   message: text("message").notNull(),
   adminNotes: text("admin_notes"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
+  createdAt: datetime("created_at").notNull().default(new Date()),
+  updatedAt: datetime("updated_at").notNull().default(new Date()),
 });
 
 export const insertTicketSchema = createInsertSchema(ticketsTable).omit({ id: true, createdAt: true, updatedAt: true });
