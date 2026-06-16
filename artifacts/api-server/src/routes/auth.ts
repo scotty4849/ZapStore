@@ -93,8 +93,13 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  req.session.userId = user.id;
-
+req.session.userId = user.id;
+  await new Promise<void>((resolve, reject) => {
+    req.session.save((err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
   const response: AuthResponse = {
     user: {
       id: user.id,
@@ -104,10 +109,6 @@ router.post("/auth/login", async (req, res): Promise<void> => {
       createdAt: user.createdAt.toISOString(),
     },
   };
-
-  res.json(response);
-});
-
 router.post("/auth/logout", async (req, res): Promise<void> => {
   req.session.destroy((err) => {
     if (err) {
