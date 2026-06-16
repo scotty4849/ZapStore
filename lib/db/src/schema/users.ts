@@ -1,14 +1,14 @@
-import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
+import { mysqlTable, text, serial, datetime, varchar } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const usersTable = pgTable("users", {
+export const usersTable = mysqlTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  email: text("email").notNull().unique(),
+  username: varchar("username", { length: 255 }).notNull().unique(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
   passwordHash: text("password_hash").notNull(),
-  role: text("role").notNull().default("user"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  role: varchar("role", { length: 50 }).notNull().default("user"),
+  createdAt: datetime("created_at").notNull().default(new Date()),
 });
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true });
