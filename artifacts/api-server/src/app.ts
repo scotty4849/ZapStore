@@ -1,65 +1,24 @@
-import express, { type Express } from "express";
-import cors from "cors";
-import pinoHttp from "pino-http";
+import expressMySQL from "express-mysql-session";
 import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
-import path from "path";
-import router from "./routes";
-import { logger } from "./lib/logger";
-import { pool } from "@workspace/db";
+const MySQLStore = expressMySQL(session as any);
 
-const PgSession = connectPgSimple(session);
-const app: Express = express();
-
-app.set("trust proxy", 1); // ← ADD THIS LINE
-
-app.use(
-  pinoHttp({
-    logger,
-    serializers: {
-      req(req) {
-        return {
-          id: req.id,
-          method: req.method,
-          url: req.url?.split("?")[0],
-        };
-      },
-      res(res) {
-        return {
-          statusCode: res.statusCode,
-        };
-      },
-    },
-  }),
-);
-
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
+// replace the session() middleware with:
 app.use(
   session({
-    store: new PgSession({
-      pool,
-      tableName: "user_sessions",
+    store: new MySQLStore({
+      host: "localhost",
+      user: "luqlgbjq_Zapps",
+      password: process.env.DB_PASSWORD,
+      database: "luqlgbjq_Zapps",
     }),
-    secret: process.env["SESSION_SECRET"] || "zapstore-dev-secret-xscxrx",
+    secret: process.env.SESSION_SECRET || "zapstore-dev-secret-xscxrx",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,        // ← always true now that SSL is active
+      secure: true,
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite: "lax",     // ← changed from "none" to "lax"
+      sameSite: "lax",
     },
   }),
 );
-
-app.use("/api/uploads", express.static(path.join(__dirname, "../public/uploads")));
-app.use("/api", router);
-
-export default app;
