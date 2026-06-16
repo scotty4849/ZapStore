@@ -9,8 +9,9 @@ import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
 
 const PgSession = connectPgSimple(session);
-
 const app: Express = express();
+
+app.set("trust proxy", 1); // ← ADD THIS LINE
 
 app.use(
   pinoHttp({
@@ -36,6 +37,7 @@ app.use(cors({
   origin: true,
   credentials: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -49,10 +51,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env["NODE_ENV"] === "production",
+      secure: true,        // ← always true now that SSL is active
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      sameSite: process.env["NODE_ENV"] === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite: "lax",     // ← changed from "none" to "lax"
     },
   }),
 );
