@@ -1,13 +1,13 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { mysqlTable, text, serial, datetime, varchar, int } from "drizzle-orm/mysql-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
-export const newsUpdatesTable = pgTable("news_updates", {
+export const newsUpdatesTable = mysqlTable("news_updates", {
   id: serial("id").primaryKey(),
-  title: text("title").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
   content: text("content").notNull(),
-  authorId: integer("author_id").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  authorId: int("author_id").notNull(),
+  createdAt: datetime("created_at").notNull().default(new Date()),
 });
 
 export const insertNewsUpdateSchema = createInsertSchema(newsUpdatesTable).omit({ id: true, createdAt: true });
