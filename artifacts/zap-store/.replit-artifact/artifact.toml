@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "ZapStore"
+version = "1.0.0"
+id = "artifacts/zap-store"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21251
+
+[services.development]
+run = "pnpm --filter @workspace/zap-store run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/zap-store", "run", "build" ]
+publicDir = "artifacts/zap-store/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21251"
+BASE_PATH = "/"
